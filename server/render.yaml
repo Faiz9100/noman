@@ -1,0 +1,40 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy: connect this repo on Render as a Blueprint, pointing at this file.
+#
+# Note: uploaded player photos / team logos are written to local disk
+# (server/uploads). Render's free-tier filesystem is ephemeral — files
+# survive restarts but are wiped on a new deploy. Attach a persistent Disk
+# (Render dashboard > this service > Disks) mounted at /opt/render/project/src/uploads
+# if you need uploads to survive deploys, or swap the storage engine in
+# src/middleware/uploadMiddleware.ts for an S3-compatible bucket.
+
+services:
+  - type: web
+    name: cricket-auction-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        sync: false # e.g. https://your-app.vercel.app (comma-separate multiple origins)
+      - key: MONGO_URI
+        sync: false # MongoDB Atlas SRV connection string
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: COOKIE_NAME
+        value: cricket_auction_token
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "5"
+      - key: SEED_ADMIN_NAME
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
