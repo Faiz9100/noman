@@ -12,6 +12,11 @@ export const auctionService = {
     return data.data;
   },
 
+  async create(name: string): Promise<Auction> {
+    const { data } = await api.post<ApiResponse<Auction>>("/auctions", { name });
+    return data.data;
+  },
+
   /**
    * Resolves "the auction the control room / projector should be pointed
    * at right now" — the most recently created auction that isn't finished,

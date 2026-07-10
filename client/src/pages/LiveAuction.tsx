@@ -25,6 +25,8 @@ export function LiveAuction() {
   const [customBid, setCustomBid] = useState("");
   const [resetOpen, setResetOpen] = useState(false);
   const [closeOpen, setCloseOpen] = useState(false);
+  const [creatingAuction, setCreatingAuction] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const { auction, bidLog, lotClosed, roundAdvanced, isLoading, error, connected, actions } =
     useAuctionEngine(auctionId);
@@ -77,6 +79,19 @@ export function LiveAuction() {
     }
   }
 
+  async function handleCreateAuction() {
+    setCreatingAuction(true);
+    setCreateError(null);
+    try {
+      const created = await auctionService.create("Auction Night");
+      setAuctionId(created._id);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Could not create the auction");
+    } finally {
+      setCreatingAuction(false);
+    }
+  }
+
   async function handleExport() {
     if (!auctionId) return;
     setToolbarBusy("export");
@@ -96,10 +111,13 @@ export function LiveAuction() {
       <Card className="mx-auto max-w-lg text-center">
         <Icon name="gavel" className="mx-auto mb-4 h-10 w-10 text-gold-500/60" />
         <h2 className="mb-2 font-display text-xl font-semibold text-ivory">No auction configured</h2>
-        <p className="text-sm text-ivory/50">
-          Run <code className="rounded bg-white/10 px-1.5 py-0.5 text-gold-400">npm run seed:data</code> on the
-          server to create a draft auction, teams, and players.
+        <p className="mb-4 text-sm text-ivory/50">
+          Create a draft auction to get started, then add teams and players from their pages.
         </p>
+        <Button onClick={handleCreateAuction} isLoading={creatingAuction}>
+          Create Auction
+        </Button>
+        {createError && <p className="mt-3 text-sm text-red-400">{createError}</p>}
       </Card>
     );
   }
