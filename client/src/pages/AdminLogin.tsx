@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "../components/common/Button";
 import { Icon } from "../components/common/Icon";
 import { useAuth } from "../hooks/useAuth";
-import { DEMO_CREDENTIALS, ROUTES } from "../utils/constants";
+import { ROUTES } from "../utils/constants";
 
 export function AdminLogin() {
   const { login } = useAuth();
@@ -31,11 +31,6 @@ export function AdminLogin() {
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  function fillDemo() {
-    setEmail(DEMO_CREDENTIALS.email);
-    setPassword(DEMO_CREDENTIALS.password);
   }
 
   return (
@@ -108,23 +103,6 @@ export function AdminLogin() {
           Sign in to control room
         </Button>
       </form>
-
-      <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.03] p-3.5">
-        <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ivory/50">
-          <Icon name="sparkles" className="h-3.5 w-3.5 text-gold-400" />
-          Demo access — no backend yet
-        </p>
-        <p className="text-xs text-ivory/50">
-          {DEMO_CREDENTIALS.email} &middot; {DEMO_CREDENTIALS.password}
-        </p>
-        <button
-          type="button"
-          onClick={fillDemo}
-          className="mt-2 text-xs font-medium text-gold-400 hover:text-gold-300"
-        >
-          Autofill demo credentials
-        </button>
-      </div>
     </div>
   );
 }

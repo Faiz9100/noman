@@ -34,8 +34,3 @@ export const ROUTES = {
 export const PLAYER_ROLES = ["Batsman", "Bowler", "All-Rounder", "Wicket-Keeper"] as const;
 
 export const PLAYER_STATUSES = ["Available", "Sold", "Unsold"] as const;
-
-export const DEMO_CREDENTIALS = {
-  email: "admin@auctionnight.com",
-  password: "Admin@123",
-} as const;
