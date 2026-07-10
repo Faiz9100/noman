@@ -44,20 +44,28 @@ function tone(freq: number, duration: number, type: OscillatorType, startOffset:
   osc.stop(start + duration + 0.05);
 }
 
-/** A single filtered-noise "clap" — one hand-clap in a crowd. */
-function clap(startOffset: number, gain: number): void {
-  const audioCtx = getContext();
-  if (!audioCtx) return;
+let clapBuffer: AudioBuffer | null = null;
 
+/** One shared noise buffer, built lazily once per page load and reused for every clap. */
+function getClapBuffer(audioCtx: AudioContext): AudioBuffer {
+  if (clapBuffer) return clapBuffer;
   const bufferSize = Math.floor(audioCtx.sampleRate * 0.15);
   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
     data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
   }
+  clapBuffer = buffer;
+  return buffer;
+}
+
+/** A single filtered-noise "clap" — one hand-clap in a crowd. */
+function clap(startOffset: number, gain: number): void {
+  const audioCtx = getContext();
+  if (!audioCtx) return;
 
   const noise = audioCtx.createBufferSource();
-  noise.buffer = buffer;
+  noise.buffer = getClapBuffer(audioCtx);
 
   const bandpass = audioCtx.createBiquadFilter();
   bandpass.type = "bandpass";
@@ -77,11 +85,16 @@ function clap(startOffset: number, gain: number): void {
   noise.stop(start + 0.16);
 }
 
-/** A short burst of crowd applause — layered under the sold chime. */
+/** A short burst of crowd applause — layered under the sold chime. Never lets a Web Audio
+ * failure (e.g. an unsupported node on some browser) take down the rest of the sold sound. */
 export function playApplauseSound(): void {
-  const clapCount = 26;
-  for (let i = 0; i < clapCount; i++) {
-    clap(Math.random() * 1.1, 0.12 + Math.random() * 0.1);
+  try {
+    const clapCount = 14;
+    for (let i = 0; i < clapCount; i++) {
+      clap(Math.random() * 1.1, 0.15 + Math.random() * 0.1);
+    }
+  } catch {
+    // Applause is a bonus flourish — silently skip it rather than break the sold chime.
   }
 }
 
