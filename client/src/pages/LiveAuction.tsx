@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card } from "../components/common/Card";
 import { Badge } from "../components/common/Badge";
-import { Avatar } from "../components/common/Avatar";
+import { PlayerPhoto } from "../components/common/PlayerPhoto";
 import { Counter } from "../components/common/Counter";
 import { Icon } from "../components/common/Icon";
 import { Button } from "../components/common/Button";
@@ -285,7 +285,7 @@ export function LiveAuction() {
                     transition={{ duration: 0.35 }}
                     className="flex flex-col items-center"
                   >
-                    <Avatar name={player.name} size="xl" className="mb-5 h-28 w-28 text-3xl shadow-gold" />
+                    <PlayerPhoto name={player.name} photoUrl={player.photoUrl} size="xl" className="mb-5 h-28 w-28 text-3xl shadow-gold" />
                     <h2 className="font-display text-2xl font-semibold text-ivory sm:text-3xl">{player.name}</h2>
                     <p className="mt-1 text-sm text-ivory/50">
                       {player.role} &middot; {player.country}

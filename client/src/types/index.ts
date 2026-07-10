@@ -140,6 +140,11 @@ export interface CsvImportResult {
   errors: { row: number; message: string }[];
 }
 
+export interface BulkPhotoResult {
+  matched: { fileName: string; playerId: string; playerName: string }[];
+  unmatched: { fileName: string; reason: string }[];
+}
+
 export interface SocketAck<T = unknown> {
   success: boolean;
   message?: string;

@@ -1,5 +1,5 @@
 import { api } from "./api";
-import { ApiResponse, CsvImportResult, Player } from "../types";
+import { ApiResponse, BulkPhotoResult, CsvImportResult, Player } from "../types";
 
 export const playerService = {
   async getAll(filters?: { status?: string; role?: string; search?: string }): Promise<Player[]> {
@@ -34,6 +34,16 @@ export const playerService = {
     const form = new FormData();
     form.append("file", file);
     const { data } = await api.post<ApiResponse<CsvImportResult>>("/players/import", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data.data;
+  },
+
+  /** Matches each file's name (minus extension) against a player's name — see bulkUploadPhotos on the server. */
+  async bulkUploadPhotos(files: File[]): Promise<BulkPhotoResult> {
+    const form = new FormData();
+    files.forEach((file) => form.append("photos", file));
+    const { data } = await api.post<ApiResponse<BulkPhotoResult>>("/players/photos/bulk", form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return data.data;

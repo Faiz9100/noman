@@ -92,6 +92,63 @@ export const deletePlayer = asyncHandler(async (req: AuthRequest, res: Response)
   res.status(200).json({ success: true, message: "Player deleted" });
 });
 
+/** Strips punctuation/spacing/casing so "Jamil shaikh", "jamil_shaikh.jpg", "JAMIL SHAIKH " all collapse to the same key. */
+function normalizeForMatch(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/i, "") // drop file extension
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+/**
+ * @route POST /api/players/photos/bulk
+ * Matches each uploaded image's filename (minus extension) against a
+ * player's name and attaches it as that player's photo — lets an admin
+ * drop in a folder of "Player Name.jpg" files instead of editing every
+ * player one at a time. Files that don't match exactly one player (no
+ * match, or the same normalized name shared by more than one player) are
+ * reported back rather than guessed at.
+ */
+export const bulkUploadPhotos = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+  if (files.length === 0) throw new ApiError(400, 'No image files uploaded (expected field "photos")');
+
+  const players = await Player.find().select("_id name");
+  const byKey = new Map<string, typeof players>();
+  for (const player of players) {
+    const key = normalizeForMatch(player.name);
+    const bucket = byKey.get(key);
+    if (bucket) bucket.push(player);
+    else byKey.set(key, [player]);
+  }
+
+  const matched: { fileName: string; playerId: string; playerName: string }[] = [];
+  const unmatched: { fileName: string; reason: string }[] = [];
+
+  for (const file of files) {
+    const key = normalizeForMatch(file.originalname);
+    const candidates = byKey.get(key);
+    if (!candidates || candidates.length === 0) {
+      unmatched.push({ fileName: file.originalname, reason: "No player with a matching name" });
+      continue;
+    }
+    if (candidates.length > 1) {
+      unmatched.push({ fileName: file.originalname, reason: "Multiple players share this name — rename the file to be more specific" });
+      continue;
+    }
+
+    const player = candidates[0];
+    await Player.findByIdAndUpdate(player._id, { photoUrl: `/uploads/${file.filename}` });
+    matched.push({ fileName: file.originalname, playerId: String(player._id), playerName: player.name });
+  }
+
+  res.status(200).json({
+    success: matched.length > 0,
+    message: `Matched ${matched.length} of ${files.length} photos`,
+    data: { matched, unmatched },
+  });
+});
+
 /**
  * @route POST /api/players/import
  * Bulk-creates players from an uploaded CSV (field name "file"). Required

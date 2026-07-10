@@ -22,7 +22,14 @@ const app: Application = express();
 app.set("trust proxy", 1);
 
 // Security & parsing middleware
-app.use(helmet());
+// crossOriginResourcePolicy defaults to "same-origin", which blocks the
+// frontend (a different origin — even localhost:5173 vs localhost:5000
+// count as different origins) from loading anything served here,
+// including /uploads/* player photos, in CORP-enforcing browsers (Chrome,
+// Edge, Firefox). This API is designed to be consumed by a cross-origin
+// SPA, so resources must be cross-origin readable; auth/mutation
+// endpoints are still protected separately by CORS + cookies.
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(compression());
 app.use(
   cors({

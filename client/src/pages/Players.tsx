@@ -9,6 +9,7 @@ import { PageLoader } from "../components/common/Loader";
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { PlayerFormModal } from "../components/admin/PlayerFormModal";
 import { CsvImportModal } from "../components/admin/CsvImportModal";
+import { BulkPhotoModal } from "../components/admin/BulkPhotoModal";
 import { cn, formatCurrency } from "../utils/helpers";
 import { playerService } from "../services/playerService";
 import { PLAYER_ROLES, PLAYER_STATUSES } from "../utils/constants";
@@ -36,6 +37,7 @@ export function Players() {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [bulkPhotoOpen, setBulkPhotoOpen] = useState(false);
 
   function load() {
     setIsLoading(true);
@@ -80,6 +82,10 @@ export function Players() {
           <Button variant="outline" onClick={() => setImportOpen(true)}>
             <Icon name="external-link" className="h-4 w-4" />
             Import CSV
+          </Button>
+          <Button variant="outline" onClick={() => setBulkPhotoOpen(true)}>
+            <Icon name="user" className="h-4 w-4" />
+            Bulk Upload Photos
           </Button>
           <Button
             onClick={() => {
@@ -223,6 +229,7 @@ export function Players() {
 
       <PlayerFormModal open={formOpen} onClose={() => setFormOpen(false)} onSaved={handleSaved} player={editingPlayer} />
       <CsvImportModal open={importOpen} onClose={() => setImportOpen(false)} onImported={load} />
+      <BulkPhotoModal open={bulkPhotoOpen} onClose={() => setBulkPhotoOpen(false)} onUploaded={load} />
 
       <ConfirmDialog
         open={!!deletingPlayer}
