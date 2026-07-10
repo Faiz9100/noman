@@ -57,7 +57,7 @@ export function AdminLogin() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@auctionnight.com"
+              placeholder="you@example.com"
               className="w-full rounded-lg border border-white/10 bg-navy-900 py-2.5 pl-10 pr-4 text-sm text-ivory placeholder:text-ivory/30 focus:border-gold-500"
             />
           </div>
